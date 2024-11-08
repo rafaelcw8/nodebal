@@ -118,6 +118,7 @@ export class BalancaBase {
   /**
    * Lê o peso da balança
    * @param preco Preço a ser escrito na balança
+   * @param timeout Tempo máximo em milissegundos para ler o peso
    * @returns Peso lido
    * @throws {Error} Se ocorrer um erro ao ler o peso
    *
@@ -125,18 +126,18 @@ export class BalancaBase {
    * const balanca = new ToledoUS312POP5("/dev/tty.usbserial-2130");
    *
    * balanca
-   *  .lerPeso(300)
+   *  .lerPeso(300, 10000) // Timeout de 10 segundos
    * .then((peso) => {
    *   console.log(`Peso lido: ${peso}`);
    * })
    * */
-  async lerPeso(preco?: number): Promise<number> {
+  async lerPeso(preco?: number, timeout?: number): Promise<number> {
     try {
       await this.abrirPorta();
       const pesoPromise = this.readPeso(preco);
       const result = await callWithTimeout(
         async () => await pesoPromise,
-        this.timeout,
+        timeout ?? this.timeout,
         "Timeout ao ler peso"
       );
       await this.fecharPorta();
@@ -146,4 +147,5 @@ export class BalancaBase {
       throw err;
     }
   }
+
 }
